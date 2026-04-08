@@ -36,11 +36,22 @@ https://phone-addiction-predictor-5xen22bxerb2wwubewgeqb.streamlit.app/
 - Addiction Level (Low/Medium/High)
 - Visual Insights
 <p align="center">
-  <img src="preview_2.png" width="800">
+  <img src="preview_2.png" width="600">
 </p>
 <p align="center">
-  <img src="preview_3.png" width="800">
+  <img src="preview_3.png" width="600">
 </p>
 
+## DISCLAIMER
+The dataset used in this project is simulated and defines the relationship between features and addiction levels. 
+Therefore, the model predictions are directly influenced by the dataset's assumptions.
+
+For example, lower screen time values (e.g., 4 hours/day) may be classified as risky in the dataset, 
+even though such usage might be considered normal in real-world scenarios today.
+
+This highlights that the model reflects the dataset patterns rather than absolute real-world truth.
+
+URL for the kaggle dataset: https://www.kaggle.com/code/sumedh1507/predicting-phone-addiction-level/input
+
 ---
-2026-Siddhartha Gupta
+2026-Siddhartha Gupta | Special mention to Sourja Bose for helping me out with this project!
