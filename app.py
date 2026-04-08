@@ -536,22 +536,21 @@ st.markdown("""
 
 # ---------- build_input (needs slider variables, so stays here) ----------
 def build_input():
-    input_df = pd.DataFrame(columns=features)
-    input_df.loc[0] = 0
-    input_df.at[0, "Daily_Usage_Hours"]    = daily_usage
-    input_df.at[0, "Phone_Checks_Per_Day"] = phone_checks
-    input_df.at[0, "Time_on_Social_Media"] = social_media
-    input_df.at[0, "Time_on_Gaming"]       = gaming
-    input_df.at[0, "Sleep_Hours"]          = sleep
-    input_df.at[0, "Exercise_Hours"]       = 10.0 - exercise  # inverted: more exercise → lower risk
-    input_df.at[0, "Anxiety_Level"]        = anxiety
-    input_df.at[0, "Academic_Performance"] = academic_perf
-    input_df.at[0, "Social_Interactions"]  = social_interact
+    row = {col: 0.0 for col in features}
+    row["Daily_Usage_Hours"]    = float(daily_usage)
+    row["Phone_Checks_Per_Day"] = float(phone_checks)
+    row["Time_on_Social_Media"] = float(social_media)
+    row["Time_on_Gaming"]       = float(gaming)
+    row["Sleep_Hours"]          = float(sleep)
+    row["Exercise_Hours"]       = float(10.0 - exercise)  # inverted: more exercise → lower risk
+    row["Anxiety_Level"]        = float(anxiety)
+    row["Academic_Performance"] = float(academic_perf)
+    row["Social_Interactions"]  = float(social_interact)
     purpose_col = f"Phone_Usage_Purpose_{usage_purpose}"
     control_col = f"Parental_Control_{parental_control}"
-    if purpose_col in input_df.columns: input_df.at[0, purpose_col] = 1
-    if control_col in input_df.columns: input_df.at[0, control_col] = 1
-    return input_df
+    if purpose_col in row: row[purpose_col] = 1.0
+    if control_col in row: row[control_col] = 1.0
+    return pd.DataFrame([row], columns=features)
 
 # ---------- PREDICT BUTTON ----------
 st.markdown("<br>", unsafe_allow_html=True)
