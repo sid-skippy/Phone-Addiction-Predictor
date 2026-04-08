@@ -441,8 +441,8 @@ def build_input():
     input_df.at[0, "Anxiety_Level"]        = float(anxiety)
 
     # NEW FEATURES
-    input_df.at[0, "Academic_Performance"] = float(academic)
-    input_df.at[0, "Social_Interactions"]  = float(social)
+    input_df.at[0, "Academic_Performance"]  = academic_perf
+    input_df.at[0, "Social_Interactions"]   = social_interact
 
     # One-hot encoding safely
     purpose_col = f"Phone_Usage_Purpose_{usage_purpose}"
