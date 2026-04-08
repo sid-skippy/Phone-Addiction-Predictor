@@ -281,6 +281,118 @@ hr { border-color: var(--border) !important; margin: 2rem 0 !important; }
 </style>
 """, unsafe_allow_html=True)
 
+# ---------- HELPER FUNCTIONS (defined before any call site) ----------
+
+def get_level(score):
+    if score <= 4:     return "Low"
+    elif score <= 6.5: return "Medium"
+    return "High"
+
+
+def make_radar(daily_usage, phone_checks, social_media, gaming, sleep, exercise, anxiety, academic_perf, social_interact):
+    labels = ["Daily Usage", "Phone Checks", "Social Media", "Gaming", "Sleep*", "Exercise*", "Anxiety", "Academic*", "Social Int."]
+
+    user_vals = [
+        daily_usage  / 24,
+        phone_checks / 500,
+        social_media / 24,
+        gaming       / 24,
+        1 - (sleep    / 12),
+        1 - (exercise / 10),
+        (anxiety - 1) / 9,
+        1 - ((academic_perf - 50) / 50),
+        1 - (social_interact / 10),
+    ]
+    healthy_vals = [
+        2.0  / 24,
+        30   / 500,
+        1.0  / 24,
+        0.5  / 24,
+        1 - (8.0 / 12),
+        1 - (1.0 / 10),
+        (3 - 1) / 9,
+        1 - ((80 - 50) / 50),
+        1 - (6 / 10),
+    ]
+
+    user_vals    = [max(0, min(1, v)) for v in user_vals]
+    healthy_vals = [max(0, min(1, v)) for v in healthy_vals]
+
+    labels       += [labels[0]]
+    user_vals    += [user_vals[0]]
+    healthy_vals += [healthy_vals[0]]
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatterpolar(
+        r=healthy_vals, theta=labels,
+        fill="toself",
+        fillcolor="rgba(0,229,160,0.08)",
+        line=dict(color="#00e5a0", width=1.5, dash="dot"),
+        name="Healthy Benchmark",
+    ))
+    fig.add_trace(go.Scatterpolar(
+        r=user_vals, theta=labels,
+        fill="toself",
+        fillcolor="rgba(110,143,255,0.12)",
+        line=dict(color="#6e8fff", width=2),
+        name="Your Profile",
+    ))
+    fig.update_layout(
+        height=320,
+        margin=dict(t=40, b=20, l=40, r=40),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor ="rgba(0,0,0,0)",
+        polar=dict(
+            bgcolor="rgba(0,0,0,0)",
+            radialaxis=dict(
+                visible=True, range=[0, 1],
+                showticklabels=False, gridcolor="#252a38", linecolor="#252a38",
+            ),
+            angularaxis=dict(
+                gridcolor="#252a38", linecolor="#252a38",
+                tickfont=dict(family="Space Mono", size=10, color="#a0a8bf"),
+            ),
+        ),
+        legend=dict(
+            font=dict(family="Space Mono", size=10, color="#6b7280"),
+            bgcolor="rgba(0,0,0,0)", bordercolor="rgba(0,0,0,0)",
+            orientation="h", x=0.5, xanchor="center", y=-0.08,
+        ),
+        font=dict(color="#e8eaf0"),
+    )
+    return fig
+
+
+def get_tips(daily_usage, phone_checks, social_media, gaming, sleep, exercise, anxiety, academic_perf, social_interact, level):
+    tips = []
+
+    if daily_usage >= 6:
+        tips.append(("Screen Time", "Your daily screen time is significantly above the recommended 2-3 hours. Try setting app timers and scheduling one phone-free hour before bed."))
+    if phone_checks >= 80:
+        tips.append(("Compulsive Checking", f"Checking your phone {phone_checks} times a day suggests habitual behaviour. Disable non-essential notifications and batch your checks to set intervals."))
+    if social_media >= 3:
+        tips.append(("Social Media", f"Spending {social_media} hrs on social media daily can amplify anxiety and FOMO. Unfollow accounts that don't add value and use grayscale mode."))
+    if gaming >= 3:
+        tips.append(("Gaming", f"{gaming} hrs of daily gaming is high. Set hard session limits and replace one session per day with a physical activity."))
+    if sleep < 6:
+        tips.append(("Sleep Deficit", f"Only {sleep} hrs of sleep is well below the 7-9 hr recommendation. Phone use before bed suppresses melatonin — try a 30-min pre-sleep screen ban."))
+    if exercise < 0.5:
+        tips.append(("Exercise", "Little to no daily exercise is linked to higher addictive behaviour. Even a 20-min walk improves mood and reduces compulsive phone use."))
+    if anxiety >= 7:
+        tips.append(("Anxiety", f"An anxiety level of {anxiety}/10 is high. Phone use often acts as avoidance coping. Try box-breathing or journaling as a replacement habit."))
+    if academic_perf < 65:
+        tips.append(("Academic Performance", f"A score of {academic_perf}/100 suggests phone use may be impacting your studies. Try the Pomodoro technique — 25 min focused work, 5 min break — with your phone in another room."))
+    if social_interact <= 2:
+        tips.append(("Social Isolation", f"Only {social_interact} social interactions per day is low. Heavy phone use can replace real-world connection. Schedule one in-person activity per day."))
+
+    if not tips and level != "Low":
+        tips.append(("General Wellness", "Your individual metrics look reasonable but the combined pattern suggests elevated risk. Focus on consistent sleep and intentional phone use."))
+    if not tips:
+        tips.append(("Keep it up", "Your habits are healthy. Maintain your current routine, stay mindful of gradual creep in screen time, and keep prioritising sleep and exercise."))
+
+    return tips[:4]
+
+
 # ---------- HERO ----------
 st.markdown("""
 <div class="hero-banner">
@@ -307,11 +419,11 @@ st.markdown('<div class="section-label">INPUT PARAMETERS</div>', unsafe_allow_ht
 col1, col2 = st.columns(2, gap="large")
 
 with col1:
-    daily_usage  = st.slider("Daily Usage Hours",              0.0, 24.0, 4.0, step=0.25)
-    phone_checks = st.slider("Phone Checks Per Day",           0,   500,  50,  step=5)
-    anxiety         = st.slider("Anxiety Level (1=low, 10=high)",           1,   10,   5)
+    daily_usage     = st.slider("Daily Usage Hours",                          0.0, 24.0, 4.0,  step=0.25)
+    phone_checks    = st.slider("Phone Checks Per Day",                       0,   500,  50,   step=5)
+    anxiety         = st.slider("Anxiety Level (1=low, 10=high)",             1,   10,   5)
     academic_perf   = st.slider("Academic Performance (50=low, 100=high)",    50,  100,  75)
-    social_interact = st.slider("Social Interactions Per Day (0=low, 10=high)", 0,   10,   5)
+    social_interact = st.slider("Social Interactions Per Day (0=low, 10=high)", 0, 10,   5)
 
 with col2:
     sleep    = st.slider("Sleep Hours",    0.0, 24.0, 7.0, step=0.25)
@@ -392,16 +504,13 @@ st.markdown("""
         thumbVals.forEach(function(el) {
             el.style.cssText = 'display:none!important;visibility:hidden!important;opacity:0!important;';
         });
-        // Also nuke any absolutely-positioned div that appears above slider thumbs
         document.querySelectorAll('[data-testid="stSlider"] div').forEach(function(el) {
             var style = window.getComputedStyle(el);
             if (style.position === 'absolute' && parseInt(style.bottom) > 10) {
                 el.style.cssText = 'display:none!important;';
             }
         });
-        // Fix invisible dropdown - inject style into every portal element and all descendants
         document.querySelectorAll('[data-baseweb="popover"]').forEach(function(portal) {
-            // Inject a style tag inside the portal itself so it overrides everything
             if (!portal.querySelector('style.dd-fix')) {
                 var s = document.createElement('style');
                 s.className = 'dd-fix';
@@ -425,148 +534,24 @@ st.markdown("""
 </script>
 """, unsafe_allow_html=True)
 
-# ---------- HELPERS ----------
+# ---------- build_input (needs slider variables, so stays here) ----------
 def build_input():
-
-    # Create dataframe with correct dtype
-    input_df = pd.DataFrame(np.zeros((1, len(features))), columns=features)
-
-    # Fill numeric features
-    input_df.at[0, "Daily_Usage_Hours"]    = float(daily_usage)
-    input_df.at[0, "Phone_Checks_Per_Day"] = float(phone_checks)
-    input_df.at[0, "Time_on_Social_Media"] = float(social_media)
-    input_df.at[0, "Time_on_Gaming"]       = float(gaming)
-    input_df.at[0, "Sleep_Hours"]          = float(sleep)
-    input_df.at[0, "Exercise_Hours"]       = float(10 - exercise)
-    input_df.at[0, "Anxiety_Level"]        = float(anxiety)
-
-    # NEW FEATURES
-    input_df.at[0, "Academic_Performance"]  = academic_perf
-    input_df.at[0, "Social_Interactions"]   = social_interact
-
-    # One-hot encoding safely
+    input_df = pd.DataFrame(columns=features)
+    input_df.loc[0] = 0
+    input_df.at[0, "Daily_Usage_Hours"]    = daily_usage
+    input_df.at[0, "Phone_Checks_Per_Day"] = phone_checks
+    input_df.at[0, "Time_on_Social_Media"] = social_media
+    input_df.at[0, "Time_on_Gaming"]       = gaming
+    input_df.at[0, "Sleep_Hours"]          = sleep
+    input_df.at[0, "Exercise_Hours"]       = 10.0 - exercise  # inverted: more exercise → lower risk
+    input_df.at[0, "Anxiety_Level"]        = anxiety
+    input_df.at[0, "Academic_Performance"] = academic_perf
+    input_df.at[0, "Social_Interactions"]  = social_interact
     purpose_col = f"Phone_Usage_Purpose_{usage_purpose}"
     control_col = f"Parental_Control_{parental_control}"
-
-    if purpose_col in input_df.columns:
-        input_df.at[0, purpose_col] = 1.0
-
-    if control_col in input_df.columns:
-        input_df.at[0, control_col] = 1.0
-
+    if purpose_col in input_df.columns: input_df.at[0, purpose_col] = 1
+    if control_col in input_df.columns: input_df.at[0, control_col] = 1
     return input_df
-
-# ---------- RADAR ----------
-def make_radar(daily_usage, phone_checks, social_media, gaming, sleep, exercise, anxiety, academic_perf, social_interact):
-    # Healthy benchmarks (normalised 0-1 where 1 = worst possible)
-    # For sleep/exercise higher is better, so we invert
-    labels = ["Daily Usage", "Phone Checks", "Social Media", "Gaming", "Sleep*", "Exercise*", "Anxiety", "Academic*", "Social Int."]
-
-    # Normalise each to 0-1 risk contribution
-    user_vals = [
-        daily_usage  / 24,
-        phone_checks / 500,
-        social_media / 24,
-        gaming       / 24,
-        1 - (sleep    / 12),            # inverted: more sleep = lower risk
-        1 - (exercise / 10),            # inverted
-        (anxiety - 1) / 9,
-        1 - ((academic_perf - 50) / 50),# inverted: higher academic = lower risk
-        1 - (social_interact / 10),     # inverted: more social = lower risk
-    ]
-    # Healthy benchmarks as risk score
-    healthy_vals = [
-        2.0  / 24,
-        30   / 500,
-        1.0  / 24,
-        0.5  / 24,
-        1 - (8.0 / 12),
-        1 - (1.0 / 10),
-        (3 - 1) / 9,
-        1 - ((80 - 50) / 50),
-        1 - (6 / 10),
-    ]
-
-    user_vals    = [max(0, min(1, v)) for v in user_vals]
-    healthy_vals = [max(0, min(1, v)) for v in healthy_vals]
-
-    # Close the polygon
-    labels       += [labels[0]]
-    user_vals    += [user_vals[0]]
-    healthy_vals += [healthy_vals[0]]
-
-    fig = go.Figure()
-    fig.add_trace(go.Scatterpolar(
-        r=healthy_vals, theta=labels,
-        fill="toself",
-        fillcolor="rgba(0,229,160,0.08)",
-        line=dict(color="#00e5a0", width=1.5, dash="dot"),
-        name="Healthy Benchmark",
-    ))
-    fig.add_trace(go.Scatterpolar(
-        r=user_vals, theta=labels,
-        fill="toself",
-        fillcolor="rgba(110,143,255,0.12)",
-        line=dict(color="#6e8fff", width=2),
-        name="Your Profile",
-    ))
-    fig.update_layout(
-        height=320,
-        margin=dict(t=40, b=20, l=40, r=40),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor ="rgba(0,0,0,0)",
-        polar=dict(
-            bgcolor="rgba(0,0,0,0)",
-            radialaxis=dict(
-                visible=True, range=[0, 1],
-                showticklabels=False, gridcolor="#252a38", linecolor="#252a38",
-            ),
-            angularaxis=dict(
-                gridcolor="#252a38", linecolor="#252a38",
-                tickfont=dict(family="Space Mono", size=10, color="#a0a8bf"),
-            ),
-        ),
-        legend=dict(
-            font=dict(family="Space Mono", size=10, color="#6b7280"),
-            bgcolor="rgba(0,0,0,0)", bordercolor="rgba(0,0,0,0)",
-            orientation="h", x=0.5, xanchor="center", y=-0.08,
-        ),
-        font=dict(color="#e8eaf0"),
-    )
-    return fig
-
-# ---------- PERSONALISED TIPS ----------
-def get_tips(daily_usage, phone_checks, social_media, gaming, sleep, exercise, anxiety, academic_perf, social_interact, level):
-    tips = []
-
-    if daily_usage >= 6:
-        tips.append(("Screen Time", "Your daily screen time is significantly above the recommended 2-3 hours. Try setting app timers and scheduling one phone-free hour before bed."))
-    if phone_checks >= 80:
-        tips.append(("Compulsive Checking", f"Checking your phone {phone_checks} times a day suggests habitual behaviour. Disable non-essential notifications and batch your checks to set intervals."))
-    if social_media >= 3:
-        tips.append(("Social Media", f"Spending {social_media} hrs on social media daily can amplify anxiety and FOMO. Unfollow accounts that don't add value and use grayscale mode."))
-    if gaming >= 3:
-        tips.append(("Gaming", f"{gaming} hrs of daily gaming is high. Set hard session limits and replace one session per day with a physical activity."))
-    if sleep < 6:
-        tips.append(("Sleep Deficit", f"Only {sleep} hrs of sleep is well below the 7-9 hr recommendation. Phone use before bed suppresses melatonin — try a 30-min pre-sleep screen ban."))
-    if exercise < 0.5:
-        tips.append(("Exercise", "Little to no daily exercise is linked to higher addictive behaviour. Even a 20-min walk improves mood and reduces compulsive phone use."))
-    if anxiety >= 7:
-        tips.append(("Anxiety", f"An anxiety level of {anxiety}/10 is high. Phone use often acts as avoidance coping. Try box-breathing or journaling as a replacement habit."))
-
-    if academic_perf < 65:
-        tips.append(("Academic Performance", f"A score of {academic_perf}/100 suggests phone use may be impacting your studies. Try the Pomodoro technique — 25 min focused work, 5 min break — with your phone in another room."))
-    if social_interact <= 2:
-        tips.append(("Social Isolation", f"Only {social_interact} social interactions per day is low. Heavy phone use can replace real-world connection. Schedule one in-person activity per day."))
-
-    # Fallback if all inputs are healthy but level is still elevated
-    if not tips and level != "Low":
-        tips.append(("General Wellness", "Your individual metrics look reasonable but the combined pattern suggests elevated risk. Focus on consistent sleep and intentional phone use."))
-
-    if not tips:
-        tips.append(("Keep it up", "Your habits are healthy. Maintain your current routine, stay mindful of gradual creep in screen time, and keep prioritising sleep and exercise."))
-
-    return tips[:4]  # cap at 4 tips
 
 # ---------- PREDICT BUTTON ----------
 st.markdown("<br>", unsafe_allow_html=True)
@@ -635,20 +620,20 @@ if predict_btn:
     with tips_col:
         st.markdown('<div class="section-label">PERSONALISED RECOMMENDATIONS</div>', unsafe_allow_html=True)
         tips = get_tips(daily_usage, phone_checks, social_media, gaming, sleep, exercise, anxiety, academic_perf, social_interact, level)
-        icons = ["", "", "", "", "", "", "", ""]
-        tip_icons = ["", "", "", "", "", "", ""]
         icon_map = {
-            "Screen Time": "",   "Compulsive Checking": "",
-            "Social Media": "",  "Gaming": "",
-            "Sleep Deficit": "", "Exercise": "",
-            "Anxiety": "",       "General Wellness": "",
-            "Keep it up": "",
+            "Screen Time": "📱",   "Compulsive Checking": "🔔",
+            "Social Media": "📲",  "Gaming": "🎮",
+            "Sleep Deficit": "😴", "Exercise": "🏃",
+            "Anxiety": "🧘",       "General Wellness": "💡",
+            "Keep it up": "✅",    "Academic Performance": "📚",
+            "Social Isolation": "🤝",
         }
         cards_html = '<div class="tips-grid">'
         for title, body in tips:
-            icon = icon_map.get(title, "")
+            icon = icon_map.get(title, "💡")
             cards_html += f"""
             <div class="tip-card">
+                <div class="tip-icon">{icon}</div>
                 <div>
                     <div class="tip-title">{title}</div>
                     <div class="tip-body">{body}</div>
@@ -662,7 +647,6 @@ if predict_btn:
     st.markdown('<div class="section-label">FEATURE IMPORTANCE</div>', unsafe_allow_html=True)
     fi_col1, fi_col2 = st.columns(2, gap="large")
 
-    # Highlight the two new columns in importance table
     highlight_features = ["Academic_Performance", "Social_Interactions"]
 
     def highlight_new(row):
@@ -681,8 +665,6 @@ if predict_btn:
         st.dataframe(bot5.style.apply(highlight_new, axis=1).format({"importance": "{:.4f}"}),
                      use_container_width=True, hide_index=True)
 
-    # (new feature ranking removed)
-
     st.markdown('<p style="font-family:\'Space Mono\',monospace;font-size:0.72rem;color:#6b7280;margin-top:0.8rem;">Categorical features are one-hot encoded and aligned with training features. Usage Purpose and Parental Control are among the weakest predictors in this model.</p>', unsafe_allow_html=True)
 
 # ── PREDICTION HISTORY ──
@@ -693,7 +675,7 @@ if len(st.session_state.history) > 0:
     history_df = pd.DataFrame(st.session_state.history)
 
     def colour_level(val):
-        if val == "High":   return "color: #ff4d6d; font-weight:700"
+        if val == "High":     return "color: #ff4d6d; font-weight:700"
         elif val == "Medium": return "color: #f59e0b; font-weight:700"
         return "color: #00e5a0; font-weight:700"
 
@@ -717,4 +699,7 @@ if len(st.session_state.history) > 0:
 # ---------- FOOTER ----------
 st.markdown("<hr>", unsafe_allow_html=True)
 st.markdown("""
+<div class="footer">
+    Phone Addiction Predictor &nbsp;·&nbsp; <span>ML-Powered</span> &nbsp;·&nbsp; FDS Project
+</div>
 """, unsafe_allow_html=True)
