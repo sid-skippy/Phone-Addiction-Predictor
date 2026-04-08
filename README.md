@@ -1,6 +1,9 @@
 # 🤳Phone Addiction Level Prediction
 
 This project predicts phone addiction levels using Machine Learning.
+<p align="center">
+  <img src="preview_1.png" width="800">
+</p>
 
 ## 🪶Features
 - Random Forest Model
@@ -28,11 +31,16 @@ https://phone-addiction-predictor-5xen22bxerb2wwubewgeqb.streamlit.app/
 - <b>R² Score: 0.763</b> (out of 0-1)
 - <b>MAE: 0.516</b> (out of 0-10)
   
-## 📤Output
+## 📤Output & Screenshots
 - Addiction Score (0–10)
 - Addiction Level (Low/Medium/High)
 - Visual Insights
-  
-## ✍️Authors
-- Siddhartha Gupta
-- Sourja Bose
+<p align="center">
+  <img src="preview_2.png" width="800">
+</p>
+<p align="center">
+  <img src="preview_3.png" width="800">
+</p>
+
+---
+2026-Siddhartha Gupta
