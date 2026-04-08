@@ -51,7 +51,7 @@ even though such usage might be considered normal in real-world scenarios today.
 
 This highlights that the model reflects the dataset patterns rather than absolute real-world truth.
 
-URL for the kaggle dataset: https://www.kaggle.com/code/sumedh1507/predicting-phone-addiction-level/input
+URL for the kaggle (teen_phone_addiction_dataset.csv) : https://www.kaggle.com/code/sumedh1507/predicting-phone-addiction-level/input
 
 ---
 2026-Siddhartha Gupta | Special mention to Sourja Bose for helping me out with this project!
