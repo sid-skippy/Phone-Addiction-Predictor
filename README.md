@@ -36,10 +36,8 @@ https://phone-addiction-predictor-5xen22bxerb2wwubewgeqb.streamlit.app/
 - Addiction Level (Low/Medium/High)
 - Visual Insights
 <p align="center">
-  <img src="preview_2.png" width="600">
-</p>
-<p align="center">
-  <img src="preview_3.png" width="600">
+  <img src="preview_2.png" width="48%" style="vertical-align: middle;">
+  <img src="preview_3.png" width="48%" style="vertical-align: middle;">
 </p>
 
 ## DISCLAIMER
