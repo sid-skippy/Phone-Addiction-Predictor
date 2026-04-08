@@ -427,27 +427,34 @@ st.markdown("""
 
 # ---------- HELPERS ----------
 def build_input():
-    input_df = pd.DataFrame(columns=features)
-    input_df.loc[0] = 0
-    input_df.at[0, "Daily_Usage_Hours"]    = daily_usage
-    input_df.at[0, "Phone_Checks_Per_Day"] = phone_checks
-    input_df.at[0, "Time_on_Social_Media"] = social_media
-    input_df.at[0, "Time_on_Gaming"]       = gaming
-    input_df.at[0, "Sleep_Hours"]          = sleep
-    input_df.at[0, "Exercise_Hours"]       = 10.0 - exercise  # inverted: more exercise → lower risk
-    input_df.at[0, "Anxiety_Level"]        = anxiety
-    input_df.at[0, "Academic_Performance"]  = academic_perf
-    input_df.at[0, "Social_Interactions"]   = social_interact
+
+    # Create dataframe with correct dtype
+    input_df = pd.DataFrame(np.zeros((1, len(features))), columns=features)
+
+    # Fill numeric features
+    input_df.at[0, "Daily_Usage_Hours"]    = float(daily_usage)
+    input_df.at[0, "Phone_Checks_Per_Day"] = float(phone_checks)
+    input_df.at[0, "Time_on_Social_Media"] = float(social_media)
+    input_df.at[0, "Time_on_Gaming"]       = float(gaming)
+    input_df.at[0, "Sleep_Hours"]          = float(sleep)
+    input_df.at[0, "Exercise_Hours"]       = float(10 - exercise)
+    input_df.at[0, "Anxiety_Level"]        = float(anxiety)
+
+    # NEW FEATURES
+    input_df.at[0, "Academic_Performance"] = float(academic)
+    input_df.at[0, "Social_Interactions"]  = float(social)
+
+    # One-hot encoding safely
     purpose_col = f"Phone_Usage_Purpose_{usage_purpose}"
     control_col = f"Parental_Control_{parental_control}"
-    if purpose_col in input_df.columns: input_df.at[0, purpose_col] = 1
-    if control_col in input_df.columns: input_df.at[0, control_col] = 1
-    return input_df
 
-def get_level(score):
-    if score <= 4:   return "Low"
-    elif score <= 6.5: return "Medium"
-    return "High"
+    if purpose_col in input_df.columns:
+        input_df.at[0, purpose_col] = 1.0
+
+    if control_col in input_df.columns:
+        input_df.at[0, control_col] = 1.0
+
+    return input_df
 
 # ---------- RADAR ----------
 def make_radar(daily_usage, phone_checks, social_media, gaming, sleep, exercise, anxiety, academic_perf, social_interact):
