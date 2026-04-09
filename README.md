@@ -28,8 +28,8 @@ This project predicts phone addiction levels using Machine Learning.
 https://phone-addiction-predictor-5xen22bxerb2wwubewgeqb.streamlit.app/
 
 ## 💯Model Performance
-- <b>R² Score: 0.763</b> (out of 0-1)
-- <b>MAE: 0.516</b> (out of 0-10)
+- <b>R² Score: 0.763</b> | (out of 0-1) Higher is better
+- <b>MAE: 0.516</b> | (out of 0-10) Lower is better
   
 ## 📤Output & Screenshots
 - Addiction Score (0–10)
