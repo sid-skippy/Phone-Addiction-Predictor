@@ -52,4 +52,4 @@ This highlights that the model reflects the dataset patterns rather than absolut
 URL for the kaggle (teen_phone_addiction_dataset.csv) : https://www.kaggle.com/code/sumedh1507/predicting-phone-addiction-level/input
 
 ---
-2026-Siddhartha Gupta | Special mention to Sourja Bose for helping me out with this project!
+2026 - Siddhartha Gupta | Sourja Bose
