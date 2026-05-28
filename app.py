@@ -405,9 +405,6 @@ st.markdown("""
         <div style="text-align:right; flex-shrink:0; padding-left:2rem;">
             <div style="font-family:'Space Mono',monospace; font-size:0.6rem; letter-spacing:0.14em; color:#3d4a5c; text-transform:uppercase; margin-bottom:0.75rem;">Made by</div>
             <div style="font-family:'Syne',sans-serif; font-weight:700; font-size:0.95rem; color:#e8eaf0; line-height:1.6;">Siddhartha Gupta</div>
-            <div style="font-family:'Space Mono',monospace; font-size:0.62rem; color:#00e5a0; letter-spacing:0.08em; margin-bottom:0.6rem;">24BCE5063</div>
-            <div style="font-family:'Syne',sans-serif; font-weight:700; font-size:0.95rem; color:#e8eaf0; line-height:1.6;">Sourja Bose</div>
-            <div style="font-family:'Space Mono',monospace; font-size:0.62rem; color:#00e5a0; letter-spacing:0.08em;">24BCE5110</div>
         </div>
     </div>
 </div>
