@@ -11,7 +11,7 @@ This project predicts phone addiction levels using Machine Learning.
 - Streamlit Web Application
 - Real-time Prediction
 
-## ⚙️Tech Stack
+## Tech Stack
 - Python
 - Scikit-learn
 - Pandas
