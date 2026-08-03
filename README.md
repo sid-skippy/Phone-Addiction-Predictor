@@ -1,11 +1,11 @@
-# 🤳Phone Addiction Level Prediction
+# Phone Addiction Level Prediction
 
 This project predicts phone addiction levels using Machine Learning.
 <p align="center">
   <img src="preview_1.png" width="800">
 </p>
 
-## 🪶Features
+## Features
 - Random Forest Model
 - Feature Importance Analysis
 - Streamlit Web Application
@@ -17,21 +17,21 @@ This project predicts phone addiction levels using Machine Learning.
 - Pandas
 - Streamlit
 
-## ❔How to Run
+## How to Run
 1. Train model:
    <code>python data_train.py</code>
   
 3. Run app:
    <code>streamlit run app.py</code>
 
-## 🪧Live Demo
+## Live Demo
 https://phone-addiction-predictor-5xen22bxerb2wwubewgeqb.streamlit.app/
 
-## 💯Model Performance
+## Model Performance
 - <b>R² Score: 0.763</b> | (out of 0-1) Higher is better
 - <b>MAE: 0.516</b> | (out of 0-10) Lower is better
   
-## 📤Output & Screenshots
+## Output & Screenshots
 - Addiction Score (0–10)
 - Addiction Level (Low/Medium/High)
 - Visual Insights
